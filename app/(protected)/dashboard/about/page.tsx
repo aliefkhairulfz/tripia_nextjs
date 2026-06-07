@@ -1,5 +1,4 @@
 import { getSessionToken } from '@/utils/session'
-import { Suspense } from 'react'
 
 type Aircraft = {
     manufacturer: string
@@ -19,16 +18,6 @@ type Aircraft = {
     range_nautical_miles: string
 }
 
-function AboutPage() {
-    return (
-        <div>
-            <Suspense fallback={<div>Loading...</div>}>
-                <AboutPageContent />
-            </Suspense>
-        </div>
-    )
-}
-
 async function fetchAircraft() {
     const response = await fetch('https://api.api-ninjas.com/v1/aircraft?manufacturer=Gulfstream&model=G550', {
         method: 'GET',
@@ -46,18 +35,21 @@ async function fetchAircraft() {
 async function AboutPageContent() {
     const data = await fetchAircraft()
     const sessionToken = await getSessionToken()
-    console.log({ sessionToken })
 
     return (
-        <>
-            <div>this is about page</div>
+        <div>
+            <div>this is about page, session token: {sessionToken ?? ''}</div>
             <ul>
                 {data.map((ac, i) => (
                     <li key={i}>{ac.model}</li>
                 ))}
             </ul>
-        </>
+        </div>
     )
+}
+
+function AboutPage() {
+    return <AboutPageContent />
 }
 
 export default AboutPage
