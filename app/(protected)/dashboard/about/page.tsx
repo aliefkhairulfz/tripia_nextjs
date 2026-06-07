@@ -93,6 +93,7 @@ async function fetchAircraft() {
 
 async function fetchProducts() {
     const createPath = 'products?category=all&min_price=0&max_price=0&sort_by=created_at'
+    await new Promise(res => setTimeout(res, 5000))
     const response = await fetch(`${process.env.NEXT_PUBLIC_NESTJS_URL}/${createPath}`, {
         method: 'GET',
         headers: {
@@ -105,62 +106,86 @@ async function fetchProducts() {
     return products
 }
 
-async function AboutPageContent() {
-    const aircraftData = await fetchAircraft()
-    const productsResponse = await fetchProducts()
-    const sessionToken = await getSessionToken()
-
+function AboutPage() {
     return (
         <div className="min-h-screen p-8 text-zinc-100">
-            <div className="mb-8 font-bold text-lg tracking-wider">
-                About Page / Session: <span className="text-blue-500 font-mono">{sessionToken ?? 'None'}</span>
-            </div>
+            <div className="mb-8 font-bold text-lg tracking-wider">About Page</div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Aircraft Section */}
-                <div className="p-6 rounded-none ring-1 ring-zinc-800">
-                    <h2 className="text-xl font-bold mb-4 tracking-wide border-b border-zinc-800 pb-2">Aircraft List</h2>
-                    <ul className="space-y-2">
-                        {aircraftData.map((ac, i) => (
-                            <li key={i} className="font-semibold text-zinc-300">
-                                {ac.manufacturer} — {ac.model}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                <Suspense fallback={<SectionSkeleton title="Aircraft List" rows={4} />}>
+                    <AircraftSection />
+                </Suspense>
 
-                {/* Products Section */}
-                <div className="p-6 rounded-none ring-1 ring-zinc-800">
-                    <h2 className="text-xl font-bold mb-4 tracking-wide border-b border-zinc-800 pb-2">Product List</h2>
-                    {productsResponse.ok ? (
-                        <div className="space-y-4">
-                            {productsResponse.data.map(product => (
-                                <div key={product.id} className="border-b border-zinc-900 pb-4 last:border-0 last:pb-0">
-                                    <h3 className="font-bold text-white text-lg">{product.name}</h3>
-                                    <p className="text-sm text-zinc-400 mt-1 line-clamp-2 font-normal">{product.description}</p>
-                                    <div className="mt-3 flex items-center justify-between text-xs">
-                                        <span className="font-bold text-zinc-200 bg-zinc-900 px-2 py-1 ring-1 ring-zinc-800">PRICE: ${product.price}</span>
-                                        <span className="text-zinc-500">
-                                            By: <span className="text-blue-400 hover:underline cursor-pointer font-semibold">{product.creator.name}</span>
-                                        </span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-red-400 font-semibold text-sm tracking-wider">Failed to load products: {productsResponse.message}</p>
-                    )}
-                </div>
+                <Suspense fallback={<SectionSkeleton title="Product List" rows={3} />}>
+                    <ProductsSection />
+                </Suspense>
             </div>
         </div>
     )
 }
 
-function AboutPage() {
+function SectionSkeleton({ title, rows }: { title: string; rows: number }) {
     return (
-        <Suspense fallback={<div>Loading Suspense...</div>}>
-            <AboutPageContent />
-        </Suspense>
+        <div className="p-6 ring-1 ring-zinc-800 animate-pulse">
+            <h2 className="text-xl font-bold mb-4 tracking-wide border-b border-zinc-800 pb-2 text-zinc-600">{title}</h2>
+            <div className="space-y-3">
+                {Array.from({ length: rows }).map((_, i) => (
+                    <div key={i} className="flex flex-col gap-2">
+                        <div className="h-4 bg-zinc-800 w-3/4" />
+                        <div className="h-3 bg-zinc-900 w-1/2" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+async function AircraftSection() {
+    const aircraftData = await fetchAircraft()
+    const session = await getSessionToken()
+    console.log({ session })
+
+    return (
+        <div className="p-6 rounded-none ring-1 ring-zinc-800 h-fit">
+            <h2 className="text-xl font-bold mb-4 tracking-wide border-b border-zinc-800 pb-2">Aircraft List</h2>
+            <ul className="space-y-2">
+                {aircraftData.map((ac, i) => (
+                    <li key={i} className="font-semibold text-zinc-300">
+                        {ac.manufacturer} — {ac.model}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    )
+}
+
+async function ProductsSection() {
+    const productsResponse = await fetchProducts()
+    const session = await getSessionToken()
+    console.log({ session })
+
+    return (
+        <div className="p-6 rounded-none ring-1 ring-zinc-800">
+            <h2 className="text-xl font-bold mb-4 tracking-wide border-b border-zinc-800 pb-2">Product List</h2>
+            {productsResponse.ok ? (
+                <div className="space-y-4">
+                    {productsResponse.data.map(product => (
+                        <div key={product.id} className="border-b border-zinc-900 pb-4 last:border-0 last:pb-0">
+                            <h3 className="font-bold text-white text-lg">{product.name}</h3>
+                            <p className="text-sm text-zinc-400 mt-1 line-clamp-2 font-normal">{product.description}</p>
+                            <div className="mt-3 flex items-center justify-between text-xs">
+                                <span className="font-bold text-zinc-200 bg-zinc-900 px-2 py-1 ring-1 ring-zinc-800">PRICE: ${product.price}</span>
+                                <span className="text-zinc-500">
+                                    By: <span className="text-blue-400 hover:underline cursor-pointer font-semibold">{product.creator.name}</span>
+                                </span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="text-red-400 font-semibold text-sm tracking-wider">Failed to load products: {productsResponse.message}</p>
+            )}
+        </div>
     )
 }
 
