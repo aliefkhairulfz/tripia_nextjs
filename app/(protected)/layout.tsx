@@ -11,7 +11,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <Suspense fallback={<div>Loading...</div>}>
                 <Sidebar />
             </Suspense>
-            {children}
+
+            <div className="p-6">{children}</div>
         </div>
     )
 }
