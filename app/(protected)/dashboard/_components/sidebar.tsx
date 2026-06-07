@@ -3,13 +3,17 @@
 import { getSessionToken } from '@/utils/session'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
+
+const sidebarList = [
+    { label: 'Me', val: '/dashboard/me' },
+    { label: 'About', val: '/dashboard/about' }
+]
 
 function Sidebar() {
-    const sp = useSearchParams()
-    const q = sp.get('q')
+    const pathname = usePathname()
 
-    const { data } = useQuery({
+    useQuery({
         queryKey: ['test'],
         queryFn: async () => {
             const sessionToken = await getSessionToken()
@@ -19,13 +23,11 @@ function Sidebar() {
 
     return (
         <ul className="p-6 flex flex-col divide-y divide-neutral-900">
-            <div className="px-4 py-2">Query is: {q ? q : 'empty'}</div>
-            <Link href={'me'} className="px-4 py-2">
-                Me
-            </Link>
-            <Link href={'about'} className="px-4 py-2">
-                About: {data && data.split('').slice(0, 10).join('')}
-            </Link>
+            {sidebarList.map((sidebar, i) => (
+                <Link key={i} href={sidebar.val} className={`px-4 py-2 ${sidebar.val === pathname ? 'bg-neutral-900' : ''}`}>
+                    {sidebar.label}
+                </Link>
+            ))}
         </ul>
     )
 }
