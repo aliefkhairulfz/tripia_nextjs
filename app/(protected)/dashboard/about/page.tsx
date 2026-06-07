@@ -1,4 +1,5 @@
 import { getSessionToken } from '@/utils/session'
+import { Suspense } from 'react'
 
 type Aircraft = {
     manufacturer: string
@@ -29,6 +30,7 @@ async function fetchAircraft() {
     })
 
     const data: Aircraft[] = await response.json()
+    await new Promise(resolve => setTimeout(resolve, 3000))
     return data
 }
 
@@ -49,7 +51,11 @@ async function AboutPageContent() {
 }
 
 function AboutPage() {
-    return <AboutPageContent />
+    return (
+        <Suspense fallback={<div>Loading about...</div>}>
+            <AboutPageContent />
+        </Suspense>
+    )
 }
 
 export default AboutPage
