@@ -1,5 +1,4 @@
 import { getSessionToken } from '@/utils/session'
-import { Suspense } from 'react'
 
 type Aircraft = {
     manufacturer: string
@@ -51,11 +50,7 @@ async function AboutPageContent() {
 }
 
 function AboutPage() {
-    return (
-        <Suspense fallback={<div>Loading about...</div>}>
-            <AboutPageContent />
-        </Suspense>
-    )
+    return <AboutPageContent />
 }
 
 export default AboutPage
