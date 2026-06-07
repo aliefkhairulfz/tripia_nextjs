@@ -1,3 +1,4 @@
+import { getSessionToken } from '@/utils/session'
 import { Suspense } from 'react'
 
 type Aircraft = {
@@ -28,7 +29,7 @@ function AboutPage() {
     )
 }
 
-async function AboutPageContent() {
+async function fetchAircraft() {
     const response = await fetch('https://api.api-ninjas.com/v1/aircraft?manufacturer=Gulfstream&model=G550', {
         method: 'GET',
         headers: {
@@ -39,6 +40,13 @@ async function AboutPageContent() {
     })
 
     const data: Aircraft[] = await response.json()
+    return data
+}
+
+async function AboutPageContent() {
+    const data = await fetchAircraft()
+    const sessionToken = await getSessionToken()
+    console.log({ sessionToken })
 
     return (
         <>
