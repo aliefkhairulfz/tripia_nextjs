@@ -93,7 +93,6 @@ async function fetchAircraft() {
 
 async function fetchProducts() {
     const createPath = 'products?category=all&min_price=0&max_price=0&sort_by=created_at'
-    await new Promise(res => setTimeout(res, 5000))
     const response = await fetch(`${process.env.NEXT_PUBLIC_NESTJS_URL}/${createPath}`, {
         method: 'GET',
         headers: {
